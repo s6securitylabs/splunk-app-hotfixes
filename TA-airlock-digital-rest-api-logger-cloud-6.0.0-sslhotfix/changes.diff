@@ -291,3 +291,58 @@ index b5a4ae9..b9a192a 100644
                  cert=None,
                  timeout=None, 
                  use_proxy=True
+diff --git a/default/ta_airlock_digital_rest_api_logger_cloud_settings.conf b/default/ta_airlock_digital_rest_api_logger_cloud_settings.conf
+index 15b8573..2a3d431 100644
+--- a/default/ta_airlock_digital_rest_api_logger_cloud_settings.conf
++++ b/default/ta_airlock_digital_rest_api_logger_cloud_settings.conf
+@@ -16,4 +16,6 @@ airlock_rest_api_key =
+ airlock_directory_id = 
+ airlock_tenant_id = 
+ airlock_rest_api_port = 
++airlock_disable_ssl_verification = 0
++airlock_custom_ca_cert_path = 
+ 
+diff --git a/appserver/static/js/build/globalConfig.json b/appserver/static/js/build/globalConfig.json
+index 9017ff8..2330df9 100644
+--- a/appserver/static/js/build/globalConfig.json
++++ b/appserver/static/js/build/globalConfig.json
+@@ -238,6 +238,32 @@
+                                     "errorMsg": "Max length of text input is 8192"
+                                 }
+                             ]
++                        },
++                        {
++                            "field": "airlock_disable_ssl_verification",
++                            "label": "Disable SSL Verification",
++                            "type": "checkbox",
++                            "help": "Check this to disable SSL certificate verification. Useful for self-signed certificates.",
++                            "defaultValue": "0"
++                        },
++                        {
++                            "field": "airlock_custom_ca_cert_path",
++                            "label": "Custom CA Certificate Path",
++                            "type": "text",
++                            "help": "Absolute path to a custom CA certificate (PEM format) on the Splunk server.",
++                            "required": false,
++                            "defaultValue": "",
++                            "validators": [
++                                {
++                                    "type": "string",
++                                    "minLength": 0,
++                                    "maxLength": 8192,
++                                    "errorMsg": "Max length of text input is 8192"
++                                }
++                            ],
++                            "options": {
++                                "placeholder": "/opt/splunk/etc/auth/mycerts/ca.pem"
++                            }
+                         }
+                     ]
+                 }
+@@ -797,4 +823,4 @@
+             ]
+         }
+     }
+-}
++}
+\ No newline at end of file
