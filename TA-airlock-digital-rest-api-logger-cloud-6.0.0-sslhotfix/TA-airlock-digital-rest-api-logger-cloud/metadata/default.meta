@@ -1,0 +1,17 @@
+[]
+access = read : [ * ], write : [ admin ]
+
+[eventtypes]
+export = system
+
+[props]
+export = system
+
+[transforms]
+export = system
+
+[viewstates]
+access = read : [ * ], write : [ * ]
+
+[lookups]
+export = system

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "Airlock Digital Add-On",
+    "id": {
+      "group": null,
+      "name": "TA-airlock-digital-rest-api-logger-cloud",
+      "version": "6.0.0"
+    },
+    "author": [
+      {
+        "name": "AirlockDigital",
+        "email": null,
+        "company": null
+      }
+    ],
+    "releaseDate": null,
+    "description": "Ingests Agent, File Execution and Server Activity History logs from an Airlock Digital server via the rest API.",
+    "classification": {
+      "intendedAudience": null,
+      "categories": [],
+      "developmentStatus": null
+    },
+    "commonInformationModels": null,
+    "license": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": null,
+      "text": null,
+      "uri": null
+    }
+  },
+  "dependencies": {
+  },
+  "tasks": [],
+  "inputGroups": {
+  },
+  "incompatibleApps": {
+  },
+  "platformRequirements": {
+    "splunk": {
+      "Enterprise": "*"
+    }
+  },
+  "supportedDeployments": [
+    "*"
+  ],
+  "targetWorkloads": [
+    "*"
+  ]
+}

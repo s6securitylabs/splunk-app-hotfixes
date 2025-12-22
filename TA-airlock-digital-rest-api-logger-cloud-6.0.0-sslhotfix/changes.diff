@@ -1,0 +1,293 @@
+diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
+index 6deaec5..8b83d81 100644
+--- a/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
++++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
+@@ -141,6 +141,25 @@ fields_additional_parameters = [
+             min_len=0, 
+             max_len=8192, 
+         )
++    ),
++    # Added airlock_disable_ssl_verification to allow users to disable SSL verification if needed (e.g. self-signed certs)
++    field.RestField(
++        'airlock_disable_ssl_verification',
++        required=False,
++        encrypted=False,
++        default=None,
++        validator=None
++    ),
++    # Added airlock_custom_ca_cert_path to allow users to specify a path to a custom CA certificate (PEM format)
++    field.RestField(
++        'airlock_custom_ca_cert_path',
++        required=False,
++        encrypted=False,
++        default='',
++        validator=validator.String(
++            min_len=0, 
++            max_len=8192, 
++        )
+     )
+ ]
+ model_additional_parameters = RestModel(fields_additional_parameters, name='additional_parameters')
+diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py
+index 231377d..f80bc3b 100644
+--- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py
++++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py
+@@ -15,7 +15,14 @@ def collect_events(helper, ew):
+     opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
+     opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
+     opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
++    opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
+     opt_airlock_directory_id = helper.get_global_setting('airlock_directory_id')
++    
++    # Get SSL verification settings
++    # airlock_disable_ssl_verification: allow user to disable SSL verification
++    # airlock_custom_ca_cert_path: allow user to specify custom CA path
++    opt_disable_ssl = helper.get_global_setting('airlock_disable_ssl_verification')
++    opt_ca_cert_path = helper.get_global_setting('airlock_custom_ca_cert_path')
+ 
+     local_airlock_directory_id = helper.get_arg("local_airlock_cloud_directoryid")
+     local_airlock_tenantid = helper.get_arg("local_airlock_cloud_tenantid")
+@@ -48,13 +55,17 @@ def collect_events(helper, ew):
+     url = "https://" + opt_airlock_server_url + (":" + opt_airlock_rest_api_port if opt_airlock_rest_api_port else "") + endpoint
+ 
+     ###
+-    #IF RUNNING ON PREM AIRLOCK WITH SELF SIGNED CERT
++    # SSL Verification Logic
++    # 1. If airlock_disable_ssl_verification is true, verify = False
++    # 2. If airlock_custom_ca_cert_path is set, verify = path
++    # 3. Default verify = True
+     ###
+-
+-    #1. Put ca.crt (AirlockCA) in `/opt/splunk/etc/auth/mycerts/`. This can be obtained from the settings menu in the Airlock console under the 'other' tab.
+-    #2. Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
+-    #3. Errors will be logged and can be seen by running a search:
+-    #   index=_internal sourcetype="taairlockdigitalrestapiloggercloud:log"
++    
++    verify_ssl = True
++    if opt_disable_ssl and str(opt_disable_ssl).lower() in ('true', '1', 'yes', 'on'):
++        verify_ssl = False
++    elif opt_ca_cert_path and str(opt_ca_cert_path).strip():
++        verify_ssl = str(opt_ca_cert_path).strip()
+ 
+     response = helper.send_http_request(
+         url, 
+@@ -62,7 +73,7 @@ def collect_events(helper, ew):
+         parameters=None, 
+         headers=headers, 
+         cookies=None, 
+-        verify=True, 
++        verify=verify_ssl, 
+         cert=None, 
+         timeout=None, 
+         use_proxy=True
+diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py
+index 3a04b5f..365a13d 100644
+--- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py
++++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py
+@@ -15,7 +15,20 @@ def collect_events(helper, ew):
+     opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
+     opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
+     opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
++    opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
+     opt_airlock_directory_id = helper.get_global_setting('airlock_directory_id')
++    
++    # Get SSL verification settings
++    opt_disable_ssl = helper.get_global_setting('airlock_disable_ssl_verification')
++    opt_ca_cert_path = helper.get_global_setting('airlock_custom_ca_cert_path')
++    
++    # Determine verify_ssl value based on settings
++    # Default is True. If disable is checked, False. If path provided, use path.
++    verify_ssl = True
++    if opt_disable_ssl and str(opt_disable_ssl).lower() in ('true', '1', 'yes', 'on'):
++        verify_ssl = False
++    elif opt_ca_cert_path and str(opt_ca_cert_path).strip():
++        verify_ssl = str(opt_ca_cert_path).strip()
+ 
+     local_airlock_directory_id = helper.get_arg("local_airlock_cloud_directoryid")
+     local_airlock_tenantid = helper.get_arg("local_airlock_cloud_tenantid")
+@@ -65,15 +78,7 @@ def collect_events(helper, ew):
+     if checkpoint is None:
+         helper.log_debug("No historical checkpoint found, obtaining restart checkpoint from Airlock") 
+ 
+-    ###
+-    #IF RUNNING ON PREM AIRLOCK WITH SELF SIGNED CERT
+-    ###
+-
+-    #1. Put ca.crt (AirlockCA) in `/opt/splunk/etc/auth/mycerts/`. This can be obtained from the settings menu in the Airlock console under the 'other' tab.
+-    #2. Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
+-    #3. Errors will be logged and can be seen by running a search:
+-    #   index=_internal sourcetype="taairlockdigitalrestapiloggercloud:log"
+-    
++    # Updated to use dynamic verify_ssl
+         response = helper.send_http_request(
+             url, 
+             method="POST", 
+@@ -81,7 +86,7 @@ def collect_events(helper, ew):
+             payload={"type":opt_execution_types_to_collect},
+             headers=headers, 
+             cookies=None, 
+-            verify=True, 
++            verify=verify_ssl, 
+             cert=None, 
+             timeout=None, 
+             use_proxy=True
+@@ -106,10 +111,7 @@ def collect_events(helper, ew):
+     else:
+         helper.log_debug("Historical checkpoint found:" + checkpoint)
+         try:
+-            ####
+-            #IF RUNNING ON PREM AIRLOCK 
+-            ###
+-            #Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
++            # Updated to use dynamic verify_ssl
+             response = helper.send_http_request(
+                 url, 
+                 method="POST", 
+@@ -117,7 +119,7 @@ def collect_events(helper, ew):
+                 payload={"checkpoint":checkpoint,"type":opt_execution_types_to_collect},
+                 headers=headers, 
+                 cookies=None, 
+-                verify=True, 
++                verify=verify_ssl, 
+                 cert=None,
+                 timeout=None, 
+                 use_proxy=True
+diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py
+index c5c13e2..0c81589 100644
+--- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py
++++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py
+@@ -15,8 +15,20 @@ def collect_events(helper, ew):
+     opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
+     opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
+     opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
++    opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
+     opt_airlock_directory_id = helper.get_global_setting('airlock_directory_id')
+     
++    # Get SSL verification settings
++    opt_disable_ssl = helper.get_global_setting('airlock_disable_ssl_verification')
++    opt_ca_cert_path = helper.get_global_setting('airlock_custom_ca_cert_path')
++    
++    # Check disable SSL first, then path, else Default (True)
++    verify_ssl = True
++    if opt_disable_ssl and str(opt_disable_ssl).lower() in ('true', '1', 'yes', 'on'):
++        verify_ssl = False
++    elif opt_ca_cert_path and str(opt_ca_cert_path).strip():
++        verify_ssl = str(opt_ca_cert_path).strip()
++    
+     local_airlock_directory_id = helper.get_arg("local_airlock_cloud_directoryid")
+     local_airlock_tenantid = helper.get_arg("local_airlock_cloud_tenantid")
+  
+@@ -46,21 +58,14 @@ def collect_events(helper, ew):
+             }
+     url = "https://" + opt_airlock_server_url + (":" + opt_airlock_rest_api_port if opt_airlock_rest_api_port else "") + endpoint
+ 
+-    ###
+-    #IF RUNNING ON PREM AIRLOCK WITH SELF SIGNED CERT
+-    ###
+-
+-    #1. Put ca.crt (AirlockCA) in `/opt/splunk/etc/auth/mycerts/`. This can be obtained from the settings menu in the Airlock console under the 'other' tab.
+-    #2. Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
+-    #3. Scroll down for #3
+-
++    # Updated manual instruction block to dynamic logic
+     response = helper.send_http_request(
+         url, 
+         method="POST", 
+         parameters=None, 
+         headers=headers, 
+         cookies=None, 
+-        verify=True, 
++        verify=verify_ssl, 
+         cert=None, 
+         timeout=None, 
+         use_proxy=True
+@@ -81,7 +86,7 @@ def collect_events(helper, ew):
+ 
+         url = "https://" + opt_airlock_server_url + (":" + opt_airlock_rest_api_port if opt_airlock_rest_api_port else "") + endpoint
+ 
+-        #3. Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
++        # Updated manual instruction block to dynamic logic
+         response = helper.send_http_request(
+             url, 
+             method="POST", 
+@@ -89,7 +94,7 @@ def collect_events(helper, ew):
+             payload={"groupid": groupid}, 
+             headers=headers, 
+             cookies=None, 
+-            verify=True, 
++            verify=verify_ssl, 
+             cert=None, 
+             timeout=None, 
+             use_proxy=True
+diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py
+index b5a4ae9..b9a192a 100644
+--- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py
++++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py
+@@ -16,8 +16,20 @@ def collect_events(helper, ew):
+     opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
+     opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
+     opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
++    opt_airlock_tenant_id = helper.get_global_setting('airlock_tenant_id')
+     opt_airlock_directory_id = helper.get_global_setting('airlock_directory_id')
+ 
++    # Get SSL verification settings
++    opt_disable_ssl = helper.get_global_setting('airlock_disable_ssl_verification')
++    opt_ca_cert_path = helper.get_global_setting('airlock_custom_ca_cert_path')
++    
++    # Determine verify_ssl: disable > path > default(True)
++    verify_ssl = True
++    if opt_disable_ssl and str(opt_disable_ssl).lower() in ('true', '1', 'yes', 'on'):
++        verify_ssl = False
++    elif opt_ca_cert_path and str(opt_ca_cert_path).strip():
++        verify_ssl = str(opt_ca_cert_path).strip()
++
+     opt_delete_existing_checkpoint = helper.get_arg('delete_existing_checkpoint')
+ 
+     local_airlock_directory_id = helper.get_arg("local_airlock_cloud_directoryid")
+@@ -66,15 +78,7 @@ def collect_events(helper, ew):
+     if svrcheckpoint is None:
+         helper.log_debug("No historical checkpoint found, obtaining restart checkpoint from Airlock") 
+ 
+-    ###
+-    #IF RUNNING ON PREM AIRLOCK WITH SELF SIGNED CERT
+-    ###
+-
+-    #1. Put ca.crt (AirlockCA) in `/opt/splunk/etc/auth/mycerts/`. This can be obtained from the settings menu in the Airlock console under the 'other' tab.
+-    #2. Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
+-    #3. Errors will be logged and can be seen by running a search:
+-    #   index=_internal sourcetype="taairlockdigitalrestapiloggercloud:log"
+-
++    # Updated to use dynamic verify_ssl
+         response = helper.send_http_request(
+             url, 
+             method="POST", 
+@@ -82,7 +86,7 @@ def collect_events(helper, ew):
+             payload=None,
+             headers=headers, 
+             cookies=None, 
+-            verify=True, 
++            verify=verify_ssl, 
+             cert=None, 
+             timeout=None, 
+             use_proxy=True
+@@ -107,10 +111,7 @@ def collect_events(helper, ew):
+     else:
+         helper.log_debug("Historical checkpoint found:" + svrcheckpoint)
+         try:
+-            ####
+-            #IF RUNNING ON PREM AIRLOCK 
+-            ###
+-            #Replace line below - verify="/opt/splunk/etc/auth/mycerts/ca.crt"
++            # Updated to use dynamic verify_ssl
+             response = helper.send_http_request(
+                 url, 
+                 method="POST", 
+@@ -118,7 +119,7 @@ def collect_events(helper, ew):
+                 payload={"checkpoint":svrcheckpoint},
+                 headers=headers, 
+                 cookies=None, 
+-                verify=True, 
++                verify=verify_ssl, 
+                 cert=None,
+                 timeout=None, 
+                 use_proxy=True
