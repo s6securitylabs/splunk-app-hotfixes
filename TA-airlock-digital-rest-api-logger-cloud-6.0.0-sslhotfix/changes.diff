@@ -1,7 +1,7 @@
-diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
+diff --git a/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py b/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
 index 6deaec5..8b83d81 100644
---- a/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
-+++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
+--- a/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
++++ b/bin/TA_airlock_digital_rest_api_logger_cloud_rh_settings.py
 @@ -141,6 +141,25 @@ fields_additional_parameters = [
              min_len=0, 
              max_len=8192, 
@@ -28,10 +28,10 @@ index 6deaec5..8b83d81 100644
      )
  ]
  model_additional_parameters = RestModel(fields_additional_parameters, name='additional_parameters')
-diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py
+diff --git a/bin/input_module_airlock_agent.py b/bin/input_module_airlock_agent.py
 index 231377d..f80bc3b 100644
---- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py
-+++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_agent.py
+--- a/bin/input_module_airlock_agent.py
++++ b/bin/input_module_airlock_agent.py
 @@ -15,7 +15,14 @@ def collect_events(helper, ew):
      opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
      opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
@@ -80,10 +80,10 @@ index 231377d..f80bc3b 100644
          cert=None, 
          timeout=None, 
          use_proxy=True
-diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py
+diff --git a/bin/input_module_airlock_execution_history.py b/bin/input_module_airlock_execution_history.py
 index 3a04b5f..365a13d 100644
---- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py
-+++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_execution_history.py
+--- a/bin/input_module_airlock_execution_history.py
++++ b/bin/input_module_airlock_execution_history.py
 @@ -15,7 +15,20 @@ def collect_events(helper, ew):
      opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
      opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
@@ -152,10 +152,10 @@ index 3a04b5f..365a13d 100644
                  cert=None,
                  timeout=None, 
                  use_proxy=True
-diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py
+diff --git a/bin/input_module_airlock_policies.py b/bin/input_module_airlock_policies.py
 index c5c13e2..0c81589 100644
---- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py
-+++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_policies.py
+--- a/bin/input_module_airlock_policies.py
++++ b/bin/input_module_airlock_policies.py
 @@ -15,8 +15,20 @@ def collect_events(helper, ew):
      opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
      opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
@@ -219,10 +219,10 @@ index c5c13e2..0c81589 100644
              cert=None, 
              timeout=None, 
              use_proxy=True
-diff --git a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py
+diff --git a/bin/input_module_airlock_server_activities.py b/bin/input_module_airlock_server_activities.py
 index b5a4ae9..b9a192a 100644
---- a/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py
-+++ b/airlock-digital-add-on_600/TA-airlock-digital-rest-api-logger-cloud-6.0.0/TA-airlock-digital-rest-api-logger-cloud/bin/input_module_airlock_server_activities.py
+--- a/bin/input_module_airlock_server_activities.py
++++ b/bin/input_module_airlock_server_activities.py
 @@ -16,8 +16,20 @@ def collect_events(helper, ew):
      opt_airlock_rest_api_port = helper.get_global_setting('airlock_rest_api_port')
      opt_airlock_rest_api_key = helper.get_global_setting('airlock_rest_api_key')
