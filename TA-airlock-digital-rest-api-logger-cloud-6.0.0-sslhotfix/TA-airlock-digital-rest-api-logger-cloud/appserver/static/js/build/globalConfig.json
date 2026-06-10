@@ -819,6 +819,109 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "airlock_otp_usage",
+                    "title": "Airlock OTP Usage",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the data input",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$",
+                                    "errorMsg": "Input Name must start with a letter and followed by alphabetic letters, digits or underscores."
+                                },
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100,
+                                    "errorMsg": "Length of input name should be between 1 and 100"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "required": true,
+                            "help": "Time interval of input in seconds.",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "pattern": "^\\-[1-9]\\d*$|^\\d*$",
+                                    "errorMsg": "Interval must be an integer."
+                                }
+                            ]
+                        },
+                        {
+                            "field": "index",
+                            "label": "Index",
+                            "type": "singleSelect",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "field": "delete_existing_checkpoint",
+                            "label": "Delete Existing Checkpoint",
+                            "help": "When checked will delete the existing OTP usage state checkpoint stored in Splunk and exit. This used for troubleshooting purposes only and the utility will not index events while this option is selected.",
+                            "required": false,
+                            "type": "checkbox"
+                        },
+                        {
+                            "field": "local_airlock_cloud_directoryid",
+                            "label": "Airlock Cloud DirectoryID",
+                            "help": "[Optional] Will override the addon configuration page. Used for multi-tenancy cloud instances.",
+                            "required": false,
+                            "type": "text",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 0,
+                                    "maxLength": 8192,
+                                    "errorMsg": "Max length of text input is 8192"
+                                }
+                            ],
+                            "options": {
+                                "placeholder": "OPTIONAL - Leave blank unless using multiple tenancies"
+                            }
+                        },
+                        {
+                            "field": "local_airlock_cloud_tenantid",
+                            "label": "Airlock Cloud TenantID",
+                            "help": "[Optional] Will override the addon configuration page. Used for multi-tenancy cloud instances.",
+                            "required": false,
+                            "type": "text",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 0,
+                                    "maxLength": 8192,
+                                    "errorMsg": "Max length of text input is 8192"
+                                }
+                            ],
+                            "options": {
+                                "placeholder": "OPTIONAL - Leave blank unless using multiple tenancies"
+                            }
+                        }
+                    ]
                 }
             ]
         }
