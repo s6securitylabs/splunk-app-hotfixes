@@ -1,5 +1,8 @@
 # Airlock Add-on: OTP Usage Input + API Logging (v6.0.1, build 11)
 
+Installable package: `TA-airlock-digital-rest-api-logger-cloud-6.0.1-otp-sslhotfix.tgz`
+(version is aligned across app.conf, app.manifest, the .aob_meta and the filename).
+
 ## Why this change exists
 
 The custom modification to pull the OTP reason into Splunk via an additional
